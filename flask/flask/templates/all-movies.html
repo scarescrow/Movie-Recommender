@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/rateYo/2.3.2/jquery.rateyo.min.css">
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/styles.css') }}">
+    <title>Document</title>
+</head>
+<body>
+    <p>Please browse all movies and rate ones that you've seen.</p>
+    {% for movie in movies %}
+    <div class="grid-container">
+        <h2><a href="{{ movie['imdb_url'] }}" target="_blank">
+            {{ movie['original_title'] }}
+        </a></h2>
+        <img src="{{ path(movie['imdb_id'], 'img/') }}">
+        <p>Overview: {{ movie['overview'] }}</p>
+        <div class="rating" id="{{ movie['imdb_id'] }}"></div>
+    </div>  
+    {% endfor %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lazyload@2.0.0-beta.2/lazyload.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/rateYo/2.3.2/jquery.rateyo.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        lazyload();
+        $('.rating').rateYo({
+            rating: 0,
+            halfStar: true,
+            numStars: 10,
+            maxValue: 10
+        }).on("rateyo.set", function (e, data) {
+            var rating = data.rating;
+            console.log($(this).attr('id'), rating);
+        });;
+    });
+    </script>
+</body>
+</html>
