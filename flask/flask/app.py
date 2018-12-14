@@ -8,7 +8,18 @@ app = Flask(__name__)
 def index():
     return render_template('index.html')
 
-# @app.route('/conventional')
+@app.route('/content')
+def content():
+    return render_template('content.html')
+
+@app.route('/content-result', methods=['GET', 'POST'])
+def content_result():
+    try:
+        title = request.form['title']
+        recs = model.content_show_recommendations(title, meta_df, cosine_sim)  
+        return render_template('content-result.html', title=title, recs=recs)
+    except:
+        return render_template('error.html')
 
 @app.route('/image')
 def image():
@@ -36,5 +47,7 @@ def list_movies():
 
 
 if __name__ == '__main__':
+    meta_df = model.load_movie_metadata()
+    cosine_sim= model.get_cosine_sim(meta_df)
     image_df = model.load_pickled_df()
     app.run(debug=True)

@@ -1,6 +1,31 @@
 import pandas as pd
 import numpy as np
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import linear_kernel
 from sklearn.neighbors import NearestNeighbors
+
+def load_movie_metadata():
+    df = pd.read_csv('static/data/the-movies-dataset/movies_metadata.csv')
+    return df
+
+def get_cosine_sim(df, overview_col_name='overview'):
+    tfidf = TfidfVectorizer(stop_words='english')
+    df[overview_col_name] = df[overview_col_name].fillna('')
+    tfidf_matrix = tfidf.fit_transform(df[overview_col_name])
+    cosine_sim = linear_kernel(tfidf_matrix, tfidf_matrix) 
+    return cosine_sim
+
+def content_show_recommendations(title, df, cosine_sim, title_col_name='title', overview_col_name='overview'):
+    recs = []
+    indices = pd.Series(df.index, index=df[title_col_name].apply(lambda x: str(x).lower())).drop_duplicates()
+    idx = indices[title.lower()]
+    sim_scores = list(enumerate(cosine_sim[idx]))
+    sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
+    sim_scores = sim_scores[1:6]
+    movie_indices = [i[0] for i in sim_scores]
+    for index, row in df.iloc[movie_indices][[title_col_name, overview_col_name]].iterrows():
+        recs.append(list(row))
+    return recs
 
 def load_pickled_df():
     df = pd.read_pickle('static/data/df.pkl')
@@ -39,8 +64,6 @@ def show_recommendations(original_title, df, dir='img/', feature_column_name='fe
         path = construct_nbr_file_path(nbr[0], dir)
         nbr.append(path)
     return nbrs
-
-
 
 
 
